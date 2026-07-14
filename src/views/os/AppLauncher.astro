@@ -1,0 +1,24 @@
+---
+import { apps } from "../../models/app-registry";
+import OsIcon from "./OsIcon.astro";
+---
+
+<nav class="launcher" aria-label="Приложения" data-i18n-aria="launcher.aria">
+    {
+        apps.map((app) => (
+            <a
+                class="launcher-item"
+                href={app.href}
+                data-app-launcher
+                data-app-id={app.id}
+                aria-controls={`window-${app.id}`}
+                aria-label={app.label}
+                data-i18n-aria={`launcher.${app.id}`}
+            >
+                <span class="launcher-item__running" aria-hidden="true" />
+                <OsIcon name={app.id} size={32} />
+                <span data-i18n={app.labelKey}>{app.label}</span>
+            </a>
+        ))
+    }
+</nav>

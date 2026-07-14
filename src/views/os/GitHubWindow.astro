@@ -1,0 +1,61 @@
+---
+import avatar from "../../assets/avatar.png";
+import { appById, GITHUB_USERNAME } from "../../models/app-registry";
+import WindowFrame from "./WindowFrame.astro";
+
+const href = appById("github")?.href ?? "#";
+---
+
+<WindowFrame
+    appId="github"
+    bodyClass="window-body--github os-scrollbar"
+    closeLabel="Закрыть GitHub"
+    title="GitHub Explorer"
+>
+    <section class="github-profile" aria-labelledby="github-profile-name">
+        <img
+            class="profile-avatar profile-avatar--github"
+            src={avatar.src}
+            alt="MoonFoxy"
+            width="112"
+            height="112"
+            loading="lazy"
+            decoding="async"
+            data-github-avatar
+        />
+        <div class="github-profile__copy">
+            <h3 id="github-profile-name" data-github-name>{GITHUB_USERNAME}</h3>
+            <p data-github-login>@{GITHUB_USERNAME}</p>
+            <p data-github-bio data-i18n="github.bio_fallback">
+                Публичный профиль и последние обновлённые репозитории.
+            </p>
+            <p class="github-meta" data-github-meta></p>
+        </div>
+    </section>
+    <div
+        class="github-state"
+        data-github-state
+        role="status"
+        aria-live="polite"
+        data-i18n="github.idle"
+    >
+        Данные загрузятся при открытии окна.
+    </div>
+    <section class="github-repository-section" aria-labelledby="github-repositories-title">
+        <h3 id="github-repositories-title" data-i18n="github.repositories">
+            Последние репозитории
+        </h3>
+        <div class="github-repositories" data-github-repos></div>
+        <template data-github-repo-template>
+            <article class="github-repository">
+                <a href={href} data-github-repo-link><strong data-github-repo-name></strong></a>
+                <p data-github-repo-description></p>
+                <div class="github-repository__meta">
+                    <span data-github-repo-language></span>
+                    <time data-github-repo-updated></time>
+                </div>
+            </article>
+        </template>
+    </section>
+    <a class="os-command" href={href} data-i18n="action.open_original">Открыть оригинал</a>
+</WindowFrame>

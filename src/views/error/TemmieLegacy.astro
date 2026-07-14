@@ -1,0 +1,191 @@
+---
+const initialMessage = "hOI!!!!!! i'm tEMMIE!!";
+const messages = [
+    initialMessage,
+    "FOOB!!!",
+    "awwAwa cute!! (pets u)",
+    "NO!!! so hungr... (dies)",
+    "fhsdhjfdsfjsddshjfsd",
+    "can't blame a BARK for tryin'...",
+    "*Temmie vibrates intensely*",
+    "*You flex at Temmie...*",
+    "*Temmiy accidentally misspells her own name*",
+];
+---
+
+<div class="temmie-shell" data-temmie-root data-messages={JSON.stringify(messages)}>
+    <button
+        class="temmie"
+        type="button"
+        data-temmie-trigger
+        aria-label="Show another Temmie message"
+    >
+        <div class="temmie-scale">
+            <div class="temmie-figure">
+                <img
+                    class="pixel-art temmie-body"
+                    width="204"
+                    height="200"
+                    src="/images/temmie_body.png"
+                    alt="Temmie body"
+                    draggable="false"
+                />
+                <img
+                    class="pixel-art temmie-face"
+                    width="58"
+                    height="44"
+                    src="/images/temmie_face.png"
+                    alt="Temmie face"
+                    draggable="false"
+                />
+            </div>
+        </div>
+        <div class="temmie-message" data-temmie-message>{initialMessage}</div>
+    </button>
+</div>
+
+<script is:inline src="/temmie/temmie.js"></script>
+
+<style>
+    .temmie-shell {
+        padding-inline: clamp(1rem, 4vw, 2rem);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .temmie {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 0;
+        color: inherit;
+        background: transparent;
+        font: inherit;
+        cursor: pointer;
+    }
+
+    .temmie:focus-visible {
+        outline: 3px solid #fff;
+        outline-offset: 0.75rem;
+    }
+
+    .temmie-scale {
+        display: inline-flex;
+        justify-content: center;
+        transform: scale(clamp(0.82, 0.7 + 0.6vw, 1));
+        transform-origin: center;
+    }
+
+    .temmie-figure {
+        position: relative;
+        margin: 1.875rem auto;
+        display: inline-block;
+        cursor: pointer;
+        animation: temmie-vibe 0.25s steps(1, end) infinite;
+    }
+
+    .temmie-face {
+        position: absolute;
+        top: 74px;
+        left: 50px;
+        animation: temmie-face-vibe 0.25s steps(1, end) infinite;
+    }
+
+    .temmie-message {
+        max-width: min(90vw, 34rem);
+        padding-inline: 1rem;
+        color: #fff;
+        font-family: "Press Start 2P", cursive;
+        font-size: clamp(0.75rem, 0.6rem + 0.7vw, 1.25rem);
+        line-height: 1.8;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-user-drag: none;
+    }
+
+    .pixel-art {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-user-drag: none;
+    }
+
+    @keyframes temmie-face-vibe {
+        0% {
+            top: 73px;
+            left: 52px;
+        }
+
+        20% {
+            top: 71px;
+            left: 52px;
+        }
+
+        40% {
+            top: 71px;
+            left: 49px;
+        }
+
+        60% {
+            top: 72px;
+            left: 50px;
+        }
+
+        80% {
+            top: 71px;
+            left: 50px;
+        }
+
+        100% {
+            top: 74px;
+            left: 53px;
+        }
+    }
+
+    @keyframes temmie-vibe {
+        0% {
+            top: 1px;
+            left: -1px;
+        }
+
+        20% {
+            top: -1px;
+            left: 0;
+        }
+
+        40% {
+            top: 1px;
+            left: -1px;
+        }
+
+        60% {
+            top: 1px;
+            left: 1px;
+        }
+
+        80% {
+            top: -1px;
+            left: 0;
+        }
+
+        100% {
+            top: 1px;
+            left: 1px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .temmie-figure,
+        .temmie-face {
+            animation: none;
+        }
+    }
+</style>

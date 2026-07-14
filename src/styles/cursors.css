@@ -1,0 +1,49 @@
+/* Native cursor files retain their own hotspots. */
+@media (hover: hover) and (pointer: fine) {
+    :root:not([data-cursor-mode]),
+    :root:not([data-cursor-mode]) body,
+    :root[data-cursor-mode="classic"],
+    :root[data-cursor-mode="classic"] body {
+        cursor: url("/cursors/jeelh/light/Normal%20Select%20Light.cur"), auto;
+    }
+
+    :root:not([data-cursor-mode]) :is(a, button, select, label, [role="button"]),
+    :root[data-cursor-mode="classic"] :is(a, button, select, label, [role="button"]) {
+        cursor: url("/cursors/jeelh/light/Select%20Light.cur"), pointer;
+    }
+
+    :root[data-cursor-mode="dark"],
+    :root[data-cursor-mode="dark"] body {
+        cursor: url("/cursors/jeelh/dark/Normal%20Select.cur"), auto;
+    }
+
+    :root[data-cursor-mode="dark"] :is(a, button, select, label, [role="button"]) {
+        cursor: url("/cursors/jeelh/dark/Select.cur"), pointer;
+    }
+
+    :root:not([data-cursor-mode]) :is(input, textarea, [contenteditable="true"]),
+    :root[data-cursor-mode="classic"] :is(input, textarea, [contenteditable="true"]) {
+        cursor: url("/cursors/jeelh/light/Text%20Select%20Light.cur"), text !important;
+    }
+
+    :root[data-cursor-mode="dark"] :is(input, textarea, [contenteditable="true"]) {
+        cursor: url("/cursors/jeelh/dark/Text%20Select.cur"), text !important;
+    }
+
+    :root:not([data-cursor-mode]) [data-window-titlebar],
+    :root[data-cursor-mode="classic"] [data-window-titlebar] {
+        cursor: url("/cursors/jeelh/light/Move%20Light.cur"), move !important;
+    }
+
+    :root[data-cursor-mode="dark"] [data-window-titlebar] {
+        cursor: url("/cursors/jeelh/dark/Move.cur"), move !important;
+    }
+}
+
+@media (forced-colors: active), (prefers-contrast: more), (hover: none), (pointer: coarse) {
+    :root,
+    :root body,
+    :root :is(a, button, select, label, input, textarea, [role="button"]) {
+        cursor: auto !important;
+    }
+}

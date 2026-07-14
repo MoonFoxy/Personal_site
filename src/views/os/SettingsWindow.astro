@@ -1,0 +1,142 @@
+---
+import WindowFrame from "./WindowFrame.astro";
+import OsIcon from "./OsIcon.astro";
+---
+
+<WindowFrame
+    appId="settings"
+    bodyClass="window-body--settings"
+    closeLabel="Закрыть настройки"
+    title="Настройки"
+>
+    <div
+        class="settings-tabs"
+        role="tablist"
+        aria-label="Разделы настроек"
+        data-i18n-aria="settings.tabs"
+    >
+        <button
+            id="settings-tab-general"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="settings-panel-general"
+            data-settings-tab
+            data-tab="general"
+            data-i18n="settings.general">Основные</button
+        >
+        <button
+            id="settings-tab-themes"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="settings-panel-themes"
+            tabindex="-1"
+            data-settings-tab
+            data-tab="themes"
+            data-i18n="settings.themes">Оформление</button
+        >
+    </div>
+
+    <section
+        id="settings-panel-general"
+        class="settings-panel"
+        role="tabpanel"
+        aria-labelledby="settings-tab-general"
+        data-settings-panel
+        data-panel="general"
+    >
+        <fieldset class="settings-group settings-group--language">
+            <legend data-i18n="settings.language">Язык</legend>
+            <div class="segmented-control">
+                <button type="button" aria-pressed="true" data-locale-option data-locale="ru"
+                    >Русский</button
+                >
+                <button type="button" aria-pressed="false" data-locale-option data-locale="en"
+                    >English</button
+                >
+            </div>
+        </fieldset>
+        <div class="settings-time-grid">
+            <div class="settings-readout">
+                <OsIcon name="calendar" size={16} />
+                <time data-local-date datetime="">--.--.----</time>
+                <small data-i18n="settings.date">Дата</small>
+            </div>
+            <div class="settings-readout">
+                <OsIcon name="clock" size={16} />
+                <time data-local-clock datetime="">--:--</time>
+                <small data-i18n="settings.time">Время</small>
+            </div>
+        </div>
+        <footer class="settings-version">
+            <strong data-i18n="settings.version">Illyune OS Version 1.0</strong>
+            <span data-i18n="settings.copyright">Copyright 2026 Illyune</span>
+        </footer>
+    </section>
+
+    <section
+        id="settings-panel-themes"
+        class="settings-panel"
+        role="tabpanel"
+        aria-labelledby="settings-tab-themes"
+        data-settings-panel
+        data-panel="themes"
+        hidden
+    >
+        <fieldset class="settings-group settings-group--cursor">
+            <legend data-i18n="settings.pointer">Курсор</legend>
+            <div class="cursor-options">
+                <div class="cursor-options__choices">
+                    <button
+                        type="button"
+                        aria-pressed="true"
+                        aria-label="Классический курсор"
+                        data-i18n-aria="settings.cursor.classic"
+                        data-cursor-option
+                        data-cursor="classic"
+                    >
+                        <span class="cursor-preview cursor-preview--classic" aria-hidden="true"
+                        ></span>
+                    </button>
+                    <button
+                        type="button"
+                        aria-pressed="false"
+                        aria-label="Тёмный курсор"
+                        data-i18n-aria="settings.cursor.dark"
+                        data-cursor-option
+                        data-cursor="dark"
+                    >
+                        <span class="cursor-preview cursor-preview--dark" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="settings-group settings-group--lighting">
+            <legend data-i18n="settings.lighting">Освещение</legend>
+            <div class="segmented-control segmented-control--three">
+                <button
+                    type="button"
+                    aria-pressed="true"
+                    data-theme-option
+                    data-theme="auto"
+                    data-i18n="theme.auto">Авто</button
+                >
+                <button
+                    type="button"
+                    aria-pressed="false"
+                    data-theme-option
+                    data-theme="day"
+                    data-i18n="theme.day">День</button
+                >
+                <button
+                    type="button"
+                    aria-pressed="false"
+                    data-theme-option
+                    data-theme="night"
+                    data-i18n="theme.night">Ночь</button
+                >
+            </div>
+        </fieldset>
+    </section>
+</WindowFrame>

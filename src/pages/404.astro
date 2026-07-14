@@ -1,0 +1,102 @@
+---
+import TemmieLegacy from "../views/error/TemmieLegacy.astro";
+
+const corners = [
+    { className: "corner top-left" },
+    { className: "corner top-right" },
+    { className: "corner bottom-left" },
+    { className: "corner bottom-right" },
+];
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="description" content="Error page" />
+        <meta name="theme-color" content="#000000" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/temmie/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/temmie/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/temmie/favicon-16x16.png" />
+        <link rel="manifest" href="/temmie/site.webmanifest" />
+        <title>tEMMIE!!</title>
+    </head>
+    <body>
+        <main class="error-page">
+            <h1 class="visually-hidden">404: page not found</h1>
+            <TemmieLegacy />
+            {
+                corners.map(({ className }) => (
+                    <div class={className} aria-hidden="true">
+                        404
+                    </div>
+                ))
+            }
+        </main>
+    </body>
+</html>
+
+<style>
+    :global(html),
+    :global(body) {
+        margin: 0;
+        min-height: 100%;
+        background: #000;
+    }
+
+    .error-page {
+        --corner-offset: clamp(1rem, 2vw + 0.5rem, 2.5rem);
+        --corner-font-size: clamp(1rem, 0.8rem + 1vw, 1.875rem);
+        position: relative;
+        display: flex;
+        min-height: 100svh;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #000;
+    }
+
+    .corner {
+        position: absolute;
+    }
+
+    .top-left {
+        top: var(--corner-offset);
+        left: var(--corner-offset);
+    }
+
+    .top-right {
+        top: var(--corner-offset);
+        right: var(--corner-offset);
+    }
+
+    .bottom-left {
+        bottom: var(--corner-offset);
+        left: var(--corner-offset);
+    }
+
+    .bottom-right {
+        right: var(--corner-offset);
+        bottom: var(--corner-offset);
+    }
+
+    .corner {
+        margin: 0;
+        color: #fff;
+        font-family: ui-monospace, "Cascadia Mono", "Courier New", monospace;
+        font-size: var(--corner-font-size);
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+</style>

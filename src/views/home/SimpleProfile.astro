@@ -1,0 +1,102 @@
+---
+import { Image } from "astro:assets";
+import avatar from "../../assets/avatar.png";
+---
+
+<figure class="profile">
+    <div class="profile__frame">
+        <Image
+            src={avatar}
+            alt="Аватар Illyune — аниме-иллюстрация девушки за компьютером"
+            widths={[192, 288, 384]}
+            width={384}
+            height={384}
+            sizes="(max-width: 640px) 88px, 132px"
+            format="webp"
+            quality={90}
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+        />
+    </div>
+</figure>
+
+<style>
+    .profile {
+        position: relative;
+        z-index: 1;
+        isolation: isolate;
+        margin: clamp(-0.5rem, -0.6vw, -0.2rem) 0 0;
+        padding: 5px;
+        border: 1px solid var(--ui-ink, #101515);
+        border-radius: 3px;
+        background: var(--ui-panel, #f4f0e4);
+        color: var(--ui-ink, #101515);
+        pointer-events: none;
+    }
+
+    .profile::before {
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        border-radius: inherit;
+        background-color: color-mix(in srgb, var(--pool-deep) 74%, transparent);
+        background-image: radial-gradient(
+            circle,
+            color-mix(in srgb, var(--wordmark-shadow) 92%, transparent) 0 0.65px,
+            transparent 0.8px
+        );
+        background-size: 2px 2px;
+        content: "";
+        transform: translate(5px, 5px);
+    }
+
+    .profile__frame {
+        width: clamp(6.5rem, 8.2vw, 8.3rem);
+        aspect-ratio: 1;
+        overflow: hidden;
+        border: 1px solid var(--ui-ink, #101515);
+        background: var(--pool-mid, #287f91);
+    }
+
+    .profile__frame :global(img) {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 53% 48%;
+    }
+
+    @media (max-width: 640px) {
+        .profile {
+            margin-top: -0.25rem;
+            padding: 4px;
+        }
+
+        .profile__frame {
+            width: 5.5rem;
+        }
+    }
+
+    @media (max-height: 440px) {
+        .profile {
+            margin-top: -0.2rem;
+            padding: 3px;
+        }
+
+        .profile__frame {
+            width: 4.6rem;
+        }
+    }
+
+    @media (forced-colors: active) {
+        .profile {
+            border-color: CanvasText;
+            background: Canvas;
+        }
+
+        .profile::before {
+            display: none;
+        }
+    }
+</style>

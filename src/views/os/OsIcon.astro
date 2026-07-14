@@ -1,0 +1,50 @@
+---
+type OsIconName =
+    "telegram" | "github" | "discord" | "x" | "email" | "settings" | "calendar" | "clock";
+
+interface Props {
+    name: OsIconName;
+    size?: number;
+    class?: string;
+}
+
+const { name, size = 16, class: className } = Astro.props;
+
+const iconSources: Record<OsIconName, string> = {
+    telegram: "/os-icons/fugue/paper-plane.png",
+    github: "/os-icons/fugue/git.png",
+    discord: "/os-icons/fugue/balloons.png",
+    x: "/os-icons/fugue/balloon-twitter.png",
+    email: "/os-icons/fugue/mail.png",
+    settings: "/os-icons/fugue/gear.png",
+    calendar: "/os-icons/fugue/calendar.png",
+    clock: "/os-icons/fugue/clock.png",
+};
+
+// Fugue Icons are authored on a 16 px grid. Keep both UI sizes on whole
+// source-pixel multiples: title bars render 1x and launcher icons render 2x.
+const displaySize = size >= 24 ? 32 : 16;
+---
+
+<img
+    class:list={["os-icon", className]}
+    src={iconSources[name]}
+    width={displaySize}
+    height={displaySize}
+    alt=""
+    aria-hidden="true"
+    decoding="sync"
+    draggable="false"
+    data-icon={name}
+    data-source-size="16"
+/>
+
+<style>
+    .os-icon {
+        display: block;
+        flex: 0 0 auto;
+        max-width: none;
+        image-rendering: crisp-edges;
+        image-rendering: pixelated;
+    }
+</style>

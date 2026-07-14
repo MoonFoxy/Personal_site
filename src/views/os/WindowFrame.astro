@@ -1,0 +1,41 @@
+---
+import type { AppId } from "../../models/app-registry";
+import OsIcon from "./OsIcon.astro";
+
+interface Props {
+    appId: AppId;
+    bodyClass: string;
+    closeLabel: string;
+    title: string;
+}
+
+const { appId, bodyClass, closeLabel, title } = Astro.props;
+---
+
+<section
+    id={`window-${appId}`}
+    class={`os-window-stage os-window-stage--${appId}`}
+    data-app-window
+    data-app-id={appId}
+    role="dialog"
+    aria-modal="false"
+    aria-labelledby={`window-title-${appId}`}
+    tabindex="-1"
+    hidden
+>
+    <span class="os-window-shadow" aria-hidden="true"></span>
+    <article class="os-window">
+        <header class="window-titlebar" data-window-titlebar>
+            <button
+                class="window-close"
+                type="button"
+                data-window-close
+                aria-label={closeLabel}
+                data-i18n-aria={`window.${appId}.close`}>×</button
+            >
+            <OsIcon name={appId} size={16} />
+            <h2 id={`window-title-${appId}`} data-i18n={`window.${appId}.title`}>{title}</h2>
+        </header>
+        <div class:list={["window-body", bodyClass]}><slot /></div>
+    </article>
+</section>

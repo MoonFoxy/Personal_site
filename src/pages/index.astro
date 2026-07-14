@@ -1,17 +1,219 @@
 ---
-
+import PoolWallpaper from "../views/home/PoolWallpaper.astro";
+import PoolWordmark from "../views/home/PoolWordmark.astro";
+import SimpleProfile from "../views/home/SimpleProfile.astro";
+import DesktopShell from "../views/os/DesktopShell.astro";
+import "../styles/cursors.css";
+import "../styles/os-fonts.css";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<!doctype html>
+<html lang="ru" data-cursor-mode="classic" data-theme-mode="auto">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta
+            name="description"
+            content="Личная страница Illyune в виде ретро-операционной системы с контактами и живым бассейном."
+        />
+        <meta name="theme-color" content="#287f91" />
+        <meta name="color-scheme" content="light dark" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Illyune — personal Pool OS" />
+        <meta
+            property="og:description"
+            content="Illyune: реалистичный бассейн, аватар и контакты внутри ретро-окон."
+        />
+        <meta property="og:url" content="https://illyu.net/" />
+        <meta property="og:site_name" content="Illyune" />
+        <meta property="og:locale" content="ru_RU" />
+        <meta name="twitter:card" content="summary" />
+        <link rel="canonical" href="https://illyu.net/" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="preload" href="/fonts/pixel-script.otf" as="font" type="font/otf" crossorigin />
+        <link rel="preload" href="/fonts/magdalena.ttf" as="font" type="font/ttf" crossorigin />
+        <link
+            rel="preload"
+            href="/fonts/magdalena-bold.ttf"
+            as="font"
+            type="font/ttf"
+            crossorigin
+        />
+        <link rel="preload" href="/fonts/neoplantabg.woff" as="font" type="font/woff" crossorigin />
+        <title>Illyune — личный Pool OS</title>
+    </head>
+    <body>
+        <main class="pool-site">
+            <PoolWallpaper />
+
+            <section class="identity" aria-labelledby="hero-title">
+                <PoolWordmark id="hero-title" />
+                <SimpleProfile />
+            </section>
+
+            <DesktopShell />
+        </main>
+
+        <noscript>
+            <style>
+                .boot-overlay {
+                    display: none !important;
+                }
+
+                .wordmark,
+                .profile {
+                    opacity: 1 !important;
+                    transform: none !important;
+                    filter: none !important;
+                    animation: none !important;
+                }
+            </style>
+        </noscript>
+
+        <script>
+            import { mountPoolOs } from "../controllers/os-controller";
+            import { mountTimeController } from "../controllers/time-controller";
+
+            const destroyPoolOs = mountPoolOs();
+            const destroyTimeState = mountTimeController();
+
+            document.addEventListener(
+                "astro:before-swap",
+                () => {
+                    destroyPoolOs();
+                    destroyTimeState();
+                },
+                { once: true },
+            );
+        </script>
+    </body>
 </html>
+
+<style is:global>
+    @font-face {
+        font-family: "Pixel Script";
+        src: url("/fonts/pixel-script.otf") format("opentype");
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+    }
+
+    :root {
+        --wordmark: #f3eed2;
+        --wordmark-shadow: #084b59;
+        --pool-deep: #07566a;
+        color: #102f35;
+        background: var(--pool-deep);
+        font-family: Tahoma, "MS Sans Serif", Geneva, sans-serif;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        color-scheme: light;
+    }
+
+    :root[data-pool-phase="morning"] {
+        --wordmark: #f0e7c6;
+        --wordmark-shadow: #284c53;
+        --pool-deep: #315f68;
+    }
+
+    :root[data-pool-phase="evening"] {
+        --wordmark: #e8dfc4;
+        --wordmark-shadow: #153c45;
+        --pool-deep: #173f4a;
+    }
+
+    :root[data-pool-phase="night"],
+    :root[data-theme-mode="night"] {
+        --wordmark: #cbd5c5;
+        --wordmark-shadow: #031824;
+        --pool-deep: #071e2c;
+        color-scheme: dark;
+    }
+
+    :root[data-theme-mode="day"] {
+        --wordmark: #f3eed2;
+        --wordmark-shadow: #084b59;
+        --pool-deep: #07566a;
+        color-scheme: light;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        width: 100%;
+        min-width: 320px;
+        min-height: 100%;
+        margin: 0;
+    }
+
+    body {
+        overflow: hidden;
+        background: var(--pool-deep);
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    a {
+        color: inherit;
+    }
+
+    button,
+    a {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .pool-site {
+        position: relative;
+        isolation: isolate;
+        width: 100%;
+        height: 100svh;
+        overflow: hidden;
+        background: var(--pool-deep);
+    }
+
+    .identity {
+        position: absolute;
+        z-index: 5;
+        top: 43%;
+        left: 50%;
+        display: flex;
+        width: 100%;
+        align-items: center;
+        flex-direction: column;
+        transform: translate(-50%, -50%);
+    }
+
+    body * {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    @supports (height: 100dvh) {
+        .pool-site {
+            height: 100dvh;
+        }
+    }
+
+    @media (max-height: 560px) {
+        .identity {
+            top: 42%;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        :root {
+            scroll-behavior: auto;
+        }
+    }
+
+    @media (forced-colors: active) {
+        .pool-site {
+            background: Canvas;
+        }
+    }
+</style>

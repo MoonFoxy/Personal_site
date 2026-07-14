@@ -1,43 +1,59 @@
-# Astro Starter Kit: Minimal
+# Illyune
+
+Это мой личный сайт — [illyu.net](https://illyu.net/). Я сделал его как маленький
+Pool OS: рабочий стол поверх воды, которая меняет свет вместе с локальным временем.
+
+На главном экране остаются мой ник `Illyune`, аватар и короткий путь ко всем
+контактам. Нижняя панель открывает Telegram, GitHub, Discord, X, почту и
+настройки прямо внутри сайта. Никаких лишних лент, выдуманных постов или
+счётчиков здесь нет.
+
+## Что здесь можно увидеть
+
+- Воду бассейна сверху, с мягкими волнами, каустиками и светом, зависящим от
+  времени на устройстве.
+- Загрузочный экран с сегментированной бирюзовой полосой.
+- Окна, которые можно перемещать на desktop; на телефоне открытое окно занимает
+  доступную область экрана.
+- Русский и English в настройках, два курсора и режимы освещения `Auto`, `Day`
+  и `Night`.
+- Открытие моих профилей в текущей вкладке и форму письма на
+  `contact@illyu.net`.
+
+## Запуск локально
+
+Мне нужны Node.js `>=22.12.0` и Yarn `1.22.x`.
 
 ```sh
-yarn create astro@latest -- --template minimal
+yarn install
+yarn dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+| Команда             | Что делает                                      |
+| ------------------- | ----------------------------------------------- |
+| `yarn dev`          | Запускает локальную версию сайта                |
+| `yarn typecheck`    | Проверяет TypeScript и Astro                    |
+| `yarn format`       | Форматирует исходники                           |
+| `yarn build`        | Собирает сайт в `dist/`                         |
+| `yarn validate`     | Полностью проверяет сайт перед публикацией      |
+| `yarn preview`      | Открывает собранную production-версию локально  |
 
-## 🚀 Project Structure
+## Публикация
 
-Inside of your Astro project, you'll see the following folders and files:
+Сайт собирается как статический. Для Cloudflare Pages я использую:
 
 ```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+Framework preset: Astro
+Build command: yarn validate
+Build output directory: dist
+Environment variable: YARN_VERSION=1.22.22
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Домен `illyu.net` подключается в настройках проекта Cloudflare Pages, в разделе
+**Custom domains**.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Лицензии
 
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `yarn install`             | Installs dependencies                            |
-| `yarn dev`             | Starts local dev server at `localhost:4321`      |
-| `yarn build`           | Build your production site to `./dist/`          |
-| `yarn preview`         | Preview your build locally, before deploying     |
-| `yarn astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `yarn astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Все необходимые notices для файлов, которые лежат в репозитории, собраны в
+[`public/licenses`](./public/licenses/). Этот сайт остаётся моим личным,
+некоммерческим проектом.

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://illyu.net/sitemap.xml

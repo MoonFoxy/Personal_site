@@ -1,0 +1,13 @@
+Pixel Script
+Copyright (c) 2018 ColorSwitchFan25
+
+Source: https://fontstruct.com/fontstructions/show/1494201/pixel-script-3
+Licensed under Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0):
+https://creativecommons.org/licenses/by-sa/3.0/
+
+The font file is redistributed without modification.
+Original archive filename: PixelScriptRegular-0WnDG.otf
+SHA-256: 5c7a27afa8c89d62e7a21af49eeaa56f8dcf059decf358f227e0d402feed7bbb
+
+The embedded font metadata identifies ColorSwitchFan25, the FontStruct source URL,
+and the same Creative Commons Attribution Share Alike 3.0 license URL.

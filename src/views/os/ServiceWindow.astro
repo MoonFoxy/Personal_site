@@ -1,0 +1,49 @@
+---
+import { Image } from "astro:assets";
+import avatar from "../../assets/avatar.png";
+import { appById, type AppId } from "../../models/app-registry";
+import WindowFrame from "./WindowFrame.astro";
+
+type ServiceAppId = Extract<AppId, "telegram" | "discord" | "x">;
+
+interface Props {
+    appId: ServiceAppId;
+    displayName: string;
+    handle: string;
+    title: string;
+    bootAvatar?: boolean;
+}
+
+const { appId, displayName, handle, title, bootAvatar = false } = Astro.props;
+const href = appById(appId)?.href ?? "#";
+---
+
+<WindowFrame
+    appId={appId}
+    bodyClass={`window-body--${appId} os-scrollbar`}
+    closeLabel={`Закрыть ${title}`}
+    title={title}
+>
+    <section class={`service-profile service-profile--${appId}`} aria-labelledby={`${appId}-name`}>
+        <Image
+            class="profile-avatar profile-avatar--large"
+            data-boot-avatar={bootAvatar || undefined}
+            src={avatar}
+            alt="Illyune"
+            width={192}
+            height={192}
+            format="webp"
+            quality={84}
+            loading="eager"
+            decoding="async"
+        />
+        <div class="service-profile__copy">
+            <h3 id={`${appId}-name`}>{displayName}</h3>
+            <p class="service-handle">{handle}</p>
+            <p class="profile-bio" data-i18n={`profile.${appId}.bio`}>
+                Публичный профиль и быстрый способ связаться со мной.
+            </p>
+        </div>
+    </section>
+    <a class="os-command" href={href} data-i18n="action.open_original">Открыть оригинал</a>
+</WindowFrame>

@@ -1,0 +1,47 @@
+---
+import { CONTACT_EMAIL } from "../../models/app-registry";
+import WindowFrame from "./WindowFrame.astro";
+---
+
+<WindowFrame
+    appId="email"
+    bodyClass="window-body--email os-scrollbar"
+    closeLabel="Закрыть почту"
+    title="New Message"
+>
+    <div class="mail-header">
+        <span data-i18n="email.to">Кому:</span><strong>{CONTACT_EMAIL}</strong>
+    </div>
+    <form
+        class="email-form"
+        action={`mailto:${CONTACT_EMAIL}`}
+        method="get"
+        enctype="text/plain"
+        data-email-form
+    >
+        <label for="email-subject" data-i18n="email.subject">Тема</label>
+        <input
+            id="email-subject"
+            name="subject"
+            type="text"
+            autocomplete="off"
+            maxlength="160"
+            data-i18n-placeholder="email.subject.placeholder"
+            data-email-subject
+        />
+        <label for="email-body" data-i18n="email.message">Сообщение</label>
+        <textarea
+            id="email-body"
+            name="body"
+            rows="8"
+            maxlength="4000"
+            data-i18n-placeholder="email.message.placeholder"
+            data-email-body></textarea>
+        <p class="mail-hint" data-i18n="email.hint">
+            Сообщение откроется в вашем почтовом приложении.
+        </p>
+        <button class="os-command os-command--button" type="submit" data-i18n="email.compose"
+            >Открыть почтовое приложение</button
+        >
+    </form>
+</WindowFrame>

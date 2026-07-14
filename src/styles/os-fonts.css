@@ -1,0 +1,23 @@
+@font-face {
+    font-family: "Magdalena";
+    src: url("/fonts/magdalena.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Magdalena";
+    src: url("/fonts/magdalena-bold.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "NeoplantaBG";
+    src: url("/fonts/neoplantabg.woff") format("woff");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}

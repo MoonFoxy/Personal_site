@@ -1,17 +1,31 @@
 {
-  "name": "flaky-flare",
-  "type": "module",
-  "version": "0.0.1",
-  "engines": {
-    "node": ">=22.12.0"
-  },
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "astro": "^6.0.8"
-  }
+    "name": "illyune-site",
+    "type": "module",
+    "version": "0.0.1",
+    "private": true,
+    "license": "UNLICENSED",
+    "packageManager": "yarn@1.22.22",
+    "engines": {
+        "node": ">=22.12.0"
+    },
+    "scripts": {
+        "dev": "node ./node_modules/astro/bin/astro.mjs dev",
+        "typecheck": "node ./node_modules/astro/bin/astro.mjs check",
+        "format": "node ./node_modules/prettier/bin/prettier.cjs --write \"src/**/*.{ts,astro,css}\" \"scripts/**/*.mjs\" \"public/temmie/*.js\" \"*.{json,mjs}\" \".github/**/*.yml\"",
+        "format:check": "node ./node_modules/prettier/bin/prettier.cjs --check \"src/**/*.{ts,astro,css}\" \"scripts/**/*.mjs\" \"public/temmie/*.js\" \"*.{json,mjs}\" \".github/**/*.yml\"",
+        "build": "yarn typecheck && node ./node_modules/astro/bin/astro.mjs build",
+        "test": "yarn build && node --no-warnings --experimental-strip-types scripts/time-state.test.mjs && node scripts/validate-build.mjs",
+        "validate": "yarn format:check && yarn test",
+        "preview": "node ./node_modules/astro/bin/astro.mjs preview",
+        "astro": "node ./node_modules/astro/bin/astro.mjs"
+    },
+    "dependencies": {
+        "astro": "7.0.9"
+    },
+    "devDependencies": {
+        "@astrojs/check": "^0.9.9",
+        "prettier": "3.9.5",
+        "prettier-plugin-astro": "^0.14.1",
+        "typescript": "5.9.3"
+    }
 }

@@ -1,0 +1,781 @@
+---
+interface Props {
+    class?: string;
+    dayProgress?: number;
+    daylight?: number;
+    sunAzimuth?: number;
+    sunElevation?: number;
+    sunIntensity?: number;
+}
+
+const clamp = (value: number | undefined, fallback: number) =>
+    Number.isFinite(value) ? Math.min(1, Math.max(0, value as number)) : fallback;
+
+const finite = (value: number | undefined, fallback: number) =>
+    Number.isFinite(value) ? (value as number) : fallback;
+
+const {
+    class: className,
+    dayProgress = 0.5,
+    daylight = 1,
+    sunAzimuth = 0,
+    sunElevation = Math.PI * 0.5,
+    sunIntensity = 1,
+} = Astro.props;
+
+const initialState = {
+    dayProgress: clamp(dayProgress, 0.5),
+    daylight: clamp(daylight, 1),
+    sunAzimuth: finite(sunAzimuth, 0),
+    sunElevation: clamp(sunElevation / (Math.PI * 0.5), 1) * Math.PI * 0.5,
+    sunIntensity: clamp(sunIntensity, 1),
+};
+---
+
+<div
+    class:list={["pool-wallpaper", className]}
+    data-pool-wallpaper
+    data-day-progress={initialState.dayProgress}
+    data-daylight={initialState.daylight}
+    data-sun-azimuth={initialState.sunAzimuth}
+    data-sun-elevation={initialState.sunElevation}
+    data-sun-intensity={initialState.sunIntensity}
+    aria-hidden="true"
+>
+    <canvas class="pool-canvas" data-pool-canvas></canvas>
+    <div class="pool-fallback" data-pool-fallback>
+        <span class="pool-fallback-caustics"></span>
+    </div>
+</div>
+
+<script>
+    import { poolShaders } from "../../renderers/pool-shaders";
+
+    type PoolContext = WebGLRenderingContext | WebGL2RenderingContext;
+    type PoolRenderer = "webgl2" | "webgl1" | "css";
+
+    interface PoolState {
+        dayProgress: number;
+        daylight: number;
+        sunAzimuth: number;
+        sunElevation: number;
+        sunIntensity: number;
+    }
+
+    interface TimeStateDetail extends Partial<PoolState> {}
+
+    interface PoolReadyDetail {
+        renderer: PoolRenderer;
+        highQuality: boolean;
+        reducedMotion: boolean;
+    }
+
+    interface PoolUniforms {
+        resolution: WebGLUniformLocation;
+        time: WebGLUniformLocation;
+        dayProgress: WebGLUniformLocation;
+        daylight: WebGLUniformLocation;
+        sunAzimuth: WebGLUniformLocation;
+        sunElevation: WebGLUniformLocation;
+        sunIntensity: WebGLUniformLocation;
+    }
+
+    const HALF_PI = Math.PI * 0.5;
+
+    const clamp = (value: number, minimum = 0, maximum = 1) =>
+        Math.min(maximum, Math.max(minimum, value));
+
+    const mix = (from: number, to: number, progress: number) => from + (to - from) * progress;
+
+    const mixWrappedProgress = (from: number, to: number, progress: number) => {
+        const delta = ((to - from + 1.5) % 1) - 0.5;
+        return (from + delta * progress + 1) % 1;
+    };
+
+    const readUnit = (value: string | undefined, fallback: number) => {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? clamp(parsed) : fallback;
+    };
+
+    const readAngle = (
+        value: string | undefined,
+        fallback: number,
+        minimum: number,
+        maximum: number,
+    ) => {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? clamp(parsed, minimum, maximum) : fallback;
+    };
+
+    const readInitialState = (stage: HTMLElement): PoolState => {
+        const root = document.documentElement.dataset;
+        return {
+            dayProgress: readUnit(root.poolDayProgress ?? stage.dataset.dayProgress, 0.5),
+            daylight: readUnit(root.poolDaylight ?? stage.dataset.daylight, 1),
+            sunAzimuth: readAngle(
+                root.poolSunAzimuth ?? stage.dataset.sunAzimuth,
+                0,
+                -HALF_PI,
+                HALF_PI,
+            ),
+            sunElevation: readAngle(
+                root.poolSunElevation ?? stage.dataset.sunElevation,
+                HALF_PI,
+                0,
+                HALF_PI,
+            ),
+            sunIntensity: readUnit(root.poolSunIntensity ?? stage.dataset.sunIntensity, 1),
+        };
+    };
+
+    const compileShader = (gl: PoolContext, type: number, source: string) => {
+        const shader = gl.createShader(type);
+        if (!shader) throw new Error("Unable to create pool shader.");
+
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            const message = gl.getShaderInfoLog(shader) ?? "Unknown pool shader compile error.";
+            gl.deleteShader(shader);
+            throw new Error(message);
+        }
+
+        return shader;
+    };
+
+    const mixColor = (
+        first: readonly [number, number, number],
+        second: readonly [number, number, number],
+        progress: number,
+    ): [number, number, number] => [
+        Math.round(mix(first[0], second[0], progress)),
+        Math.round(mix(first[1], second[1], progress)),
+        Math.round(mix(first[2], second[2], progress)),
+    ];
+
+    const colorString = (color: readonly [number, number, number]) =>
+        `rgb(${color[0]} ${color[1]} ${color[2]})`;
+
+    const updateFallbackTheme = (stage: HTMLElement, state: PoolState) => {
+        const nightBase = [3, 28, 55] as const;
+        const dayBase = [8, 119, 160] as const;
+        const nightGrout = [34, 83, 101] as const;
+        const dayGrout = [147, 211, 215] as const;
+        const base = mixColor(nightBase, dayBase, state.daylight);
+        const grout = mixColor(nightGrout, dayGrout, state.daylight);
+        const elevationNormalised = Math.sin(state.sunElevation);
+        const lightX = 50 + Math.sin(state.sunAzimuth) * 36;
+        const lightY = 34 + (1 - elevationNormalised) * 15;
+
+        stage.style.setProperty("--pool-base", colorString(base));
+        stage.style.setProperty("--pool-grout", colorString(grout));
+        stage.style.setProperty("--pool-caustic-opacity", String(0.02 + state.sunIntensity * 0.12));
+        stage.style.setProperty("--pool-glint-opacity", String(state.sunIntensity * 0.24));
+        stage.style.setProperty("--pool-light-x", `${lightX.toFixed(2)}%`);
+        stage.style.setProperty("--pool-light-y", `${lightY.toFixed(2)}%`);
+        stage.style.setProperty(
+            "--pool-caustic-angle",
+            `${(-7 + (state.sunAzimuth / HALF_PI) * 11).toFixed(2)}deg`,
+        );
+        stage.style.setProperty(
+            "--pool-fallback-shift",
+            `${(state.dayProgress * 4).toFixed(2)}rem`,
+        );
+    };
+
+    const mountPoolWallpaper = (stage: HTMLElement) => {
+        if (stage.dataset.poolMounted === "true") return;
+        stage.dataset.poolMounted = "true";
+
+        const canvas = stage.querySelector<HTMLCanvasElement>("[data-pool-canvas]");
+        if (!canvas) return;
+
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const mobile = window.matchMedia("(max-width: 700px), (pointer: coarse)");
+        const initialState = readInitialState(stage);
+        const targetState: PoolState = { ...initialState };
+        const currentState: PoolState = { ...initialState };
+        const cleanupCallbacks: Array<() => void> = [];
+        let receivedTimeState = false;
+        let readyAnnounced = false;
+        let readyTimer = 0;
+        updateFallbackTheme(stage, targetState);
+
+        let rendererDisabled = false;
+        let visible = true;
+        let frameTimer = 0;
+        let animationFrame = 0;
+        let bufferWidth = 1;
+        let bufferHeight = 1;
+        let cssWidth = 1;
+        let cssHeight = 1;
+        let sceneTime = 0;
+        let lastTick = performance.now();
+        let lastDraw = 0;
+        let performanceTime = 0;
+        let performanceSamples = 0;
+        let lastQualityAdjustment = performance.now();
+        let renderStillFrame: (() => void) | undefined;
+
+        const announceReady = (renderer: PoolRenderer) => {
+            if (readyAnnounced) return;
+            readyAnnounced = true;
+            if (readyTimer) window.clearTimeout(readyTimer);
+            stage.dataset.poolReady = "true";
+            stage.dataset.poolRenderer = renderer;
+            document.documentElement.dataset.poolReady = "true";
+            document.documentElement.dataset.poolRenderer = renderer;
+            window.dispatchEvent(
+                new CustomEvent<PoolReadyDetail>("illyune:pool-ready", {
+                    detail: {
+                        renderer,
+                        highQuality: renderer === "webgl2",
+                        reducedMotion: reducedMotion.matches,
+                    },
+                }),
+            );
+        };
+
+        const updateTimeState = (event: Event) => {
+            const detail = (event as CustomEvent<TimeStateDetail>).detail;
+            if (!detail || typeof detail !== "object") return;
+
+            if (typeof detail.dayProgress === "number" && Number.isFinite(detail.dayProgress)) {
+                targetState.dayProgress = clamp(detail.dayProgress);
+            }
+            if (typeof detail.daylight === "number" && Number.isFinite(detail.daylight)) {
+                targetState.daylight = clamp(detail.daylight);
+            }
+            if (typeof detail.sunAzimuth === "number" && Number.isFinite(detail.sunAzimuth)) {
+                targetState.sunAzimuth = clamp(detail.sunAzimuth, -HALF_PI, HALF_PI);
+            }
+            if (typeof detail.sunElevation === "number" && Number.isFinite(detail.sunElevation)) {
+                targetState.sunElevation = clamp(detail.sunElevation, 0, HALF_PI);
+            }
+            if (typeof detail.sunIntensity === "number" && Number.isFinite(detail.sunIntensity)) {
+                targetState.sunIntensity = clamp(detail.sunIntensity);
+            }
+
+            updateFallbackTheme(stage, targetState);
+
+            if (!receivedTimeState || reducedMotion.matches) {
+                receivedTimeState = true;
+                Object.assign(currentState, targetState);
+                if (visible && !document.hidden) renderStillFrame?.();
+            }
+        };
+
+        window.addEventListener("illyune:time-state", updateTimeState as EventListener);
+        cleanupCallbacks.push(() =>
+            window.removeEventListener("illyune:time-state", updateTimeState as EventListener),
+        );
+
+        const contextOptions: WebGLContextAttributes = {
+            alpha: false,
+            antialias: false,
+            depth: false,
+            stencil: false,
+            preserveDrawingBuffer: false,
+            powerPreference: "high-performance",
+        };
+
+        const webgl2 = canvas.getContext("webgl2", contextOptions);
+        const webgl1 = webgl2 ? null : canvas.getContext("webgl", contextOptions);
+        const experimentalWebgl =
+            webgl2 || webgl1
+                ? null
+                : (canvas.getContext(
+                      "experimental-webgl",
+                      contextOptions,
+                  ) as WebGLRenderingContext | null);
+        const gl: PoolContext | null = webgl2 ?? webgl1 ?? experimentalWebgl;
+        const renderer: PoolRenderer = webgl2 ? "webgl2" : gl ? "webgl1" : "css";
+
+        const stop = () => {
+            if (frameTimer) window.clearTimeout(frameTimer);
+            if (animationFrame) cancelAnimationFrame(animationFrame);
+            frameTimer = 0;
+            animationFrame = 0;
+        };
+
+        const cleanup = () => {
+            stop();
+            if (readyTimer) window.clearTimeout(readyTimer);
+            cleanupCallbacks.splice(0).forEach((callback) => callback());
+            stage.dataset.poolMounted = "false";
+        };
+        document.addEventListener("astro:before-swap", cleanup, { once: true });
+        cleanupCallbacks.push(() => document.removeEventListener("astro:before-swap", cleanup));
+
+        const useFallback = (reason?: unknown) => {
+            if (reason) console.warn("Procedural pool renderer unavailable:", reason);
+            rendererDisabled = true;
+            stop();
+            stage.classList.remove("is-ready");
+            stage.classList.add("is-fallback");
+            requestAnimationFrame(() => announceReady("css"));
+            readyTimer = window.setTimeout(() => announceReady("css"), 80);
+        };
+
+        if (!gl) {
+            useFallback();
+            window.dispatchEvent(new Event("illyune:request-time-state"));
+            return;
+        }
+
+        const shaderSource = webgl2 ? poolShaders.webgl2 : poolShaders.webgl1;
+
+        try {
+            const vertexShader = compileShader(gl, gl.VERTEX_SHADER, shaderSource.vertex);
+            const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, shaderSource.fragment);
+            const program = gl.createProgram();
+            if (!program) throw new Error("Unable to create pool shader program.");
+
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                throw new Error(
+                    gl.getProgramInfoLog(program) ?? "Unable to link pool shader program.",
+                );
+            }
+
+            gl.deleteShader(vertexShader);
+            gl.deleteShader(fragmentShader);
+            gl.useProgram(program);
+            gl.disable(gl.DEPTH_TEST);
+            gl.disable(gl.CULL_FACE);
+            gl.disable(gl.BLEND);
+
+            const position = gl.getAttribLocation(program, "a_position");
+            const uniform = (name: string) => {
+                const location = gl.getUniformLocation(program, name);
+                if (location === null) throw new Error(`Pool shader uniform is missing: ${name}`);
+                return location;
+            };
+            const uniforms: PoolUniforms = {
+                resolution: uniform("u_resolution"),
+                time: uniform("u_time"),
+                dayProgress: uniform("u_dayProgress"),
+                daylight: uniform("u_daylight"),
+                sunAzimuth: uniform("u_sunAzimuth"),
+                sunElevation: uniform("u_sunElevation"),
+                sunIntensity: uniform("u_sunIntensity"),
+            };
+            const buffer = gl.createBuffer();
+            if (!buffer || position < 0) throw new Error("Pool shader bindings are incomplete.");
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(
+                gl.ARRAY_BUFFER,
+                new Float32Array([-1, -1, 3, -1, -1, 3]),
+                gl.STATIC_DRAW,
+            );
+            gl.enableVertexAttribArray(position);
+            gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+            const qualityBounds = () =>
+                mobile.matches
+                    ? { minimum: 0.42, initial: 0.58, maximum: 0.66 }
+                    : webgl2
+                      ? { minimum: 0.55, initial: 0.76, maximum: 0.84 }
+                      : { minimum: 0.48, initial: 0.62, maximum: 0.7 };
+            let renderScale = qualityBounds().initial;
+
+            const resizeTo = (widthCss: number, heightCss: number) => {
+                cssWidth = Math.max(1, widthCss);
+                cssHeight = Math.max(1, heightCss);
+                const isMobile = mobile.matches;
+                const dpr = Math.min(
+                    window.devicePixelRatio || 1,
+                    isMobile ? 1 : webgl2 ? 1.25 : 1.1,
+                );
+                const maxPixels = isMobile ? 300_000 : webgl2 ? 1_050_000 : 620_000;
+                let width = Math.max(1, Math.round(cssWidth * dpr * renderScale));
+                let height = Math.max(1, Math.round(cssHeight * dpr * renderScale));
+                const pixels = width * height;
+
+                if (pixels > maxPixels) {
+                    const scale = Math.sqrt(maxPixels / pixels);
+                    width = Math.max(1, Math.round(width * scale));
+                    height = Math.max(1, Math.round(height * scale));
+                }
+
+                if (width !== bufferWidth || height !== bufferHeight) {
+                    bufferWidth = width;
+                    bufferHeight = height;
+                    canvas.width = width;
+                    canvas.height = height;
+                    gl.viewport(0, 0, width, height);
+                }
+            };
+
+            const measure = () => {
+                const bounds = stage.getBoundingClientRect();
+                resizeTo(bounds.width, bounds.height);
+            };
+
+            const draw = () => {
+                if (rendererDisabled) return;
+                gl.uniform2f(uniforms.resolution, bufferWidth, bufferHeight);
+                gl.uniform1f(uniforms.time, reducedMotion.matches ? 7.25 : sceneTime);
+                gl.uniform1f(uniforms.dayProgress, currentState.dayProgress);
+                gl.uniform1f(uniforms.daylight, currentState.daylight);
+                gl.uniform1f(uniforms.sunAzimuth, currentState.sunAzimuth);
+                gl.uniform1f(uniforms.sunElevation, currentState.sunElevation);
+                gl.uniform1f(uniforms.sunIntensity, currentState.sunIntensity);
+                gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+                if (!stage.classList.contains("is-ready")) {
+                    stage.classList.remove("is-fallback");
+                    stage.classList.add("is-ready");
+                }
+                announceReady(renderer);
+            };
+
+            const updateAnimatedState = (deltaSeconds: number) => {
+                const progress = 1 - Math.exp(-deltaSeconds * 2.25);
+                currentState.dayProgress = mixWrappedProgress(
+                    currentState.dayProgress,
+                    targetState.dayProgress,
+                    progress,
+                );
+                currentState.daylight = mix(currentState.daylight, targetState.daylight, progress);
+                currentState.sunAzimuth = mix(
+                    currentState.sunAzimuth,
+                    targetState.sunAzimuth,
+                    progress,
+                );
+                currentState.sunElevation = mix(
+                    currentState.sunElevation,
+                    targetState.sunElevation,
+                    progress,
+                );
+                currentState.sunIntensity = mix(
+                    currentState.sunIntensity,
+                    targetState.sunIntensity,
+                    progress,
+                );
+            };
+
+            const targetFrameDuration = () => 1000 / (mobile.matches ? 20 : webgl2 ? 30 : 24);
+
+            const adaptResolution = (deltaMilliseconds: number, now: number) => {
+                performanceTime += deltaMilliseconds;
+                performanceSamples += 1;
+                if (performanceSamples < 48) return;
+
+                const average = performanceTime / performanceSamples;
+                const target = targetFrameDuration();
+                const bounds = qualityBounds();
+                let nextScale = renderScale;
+
+                if (average > target * 1.28) {
+                    nextScale = Math.max(bounds.minimum, renderScale - 0.07);
+                } else if (average < target * 1.07 && now - lastQualityAdjustment > 8_000) {
+                    nextScale = Math.min(bounds.maximum, renderScale + 0.035);
+                }
+
+                performanceTime = 0;
+                performanceSamples = 0;
+                if (nextScale !== renderScale) {
+                    renderScale = nextScale;
+                    lastQualityAdjustment = now;
+                    resizeTo(cssWidth, cssHeight);
+                }
+            };
+
+            const schedule = () => {
+                if (
+                    rendererDisabled ||
+                    frameTimer ||
+                    animationFrame ||
+                    reducedMotion.matches ||
+                    !visible ||
+                    document.hidden
+                )
+                    return;
+
+                const delay = Math.max(0, targetFrameDuration() - (performance.now() - lastDraw));
+                frameTimer = window.setTimeout(() => {
+                    frameTimer = 0;
+                    animationFrame = requestAnimationFrame(tick);
+                }, delay);
+            };
+
+            const tick = (now: number) => {
+                animationFrame = 0;
+                if (rendererDisabled || reducedMotion.matches || !visible || document.hidden)
+                    return;
+
+                const deltaMilliseconds = Math.min(120, Math.max(0, now - lastTick));
+                const deltaSeconds = deltaMilliseconds / 1000;
+                lastTick = now;
+                sceneTime = (sceneTime + deltaSeconds) % 4096;
+                updateAnimatedState(deltaSeconds);
+                adaptResolution(deltaMilliseconds, now);
+                draw();
+                lastDraw = now;
+                schedule();
+            };
+
+            const start = () => {
+                if (rendererDisabled || reducedMotion.matches || !visible || document.hidden)
+                    return;
+                lastTick = performance.now();
+                schedule();
+            };
+
+            const renderStill = () => {
+                Object.assign(currentState, targetState);
+                draw();
+            };
+            renderStillFrame = renderStill;
+
+            const observer = new IntersectionObserver(
+                ([entry]) => {
+                    visible = entry?.isIntersecting ?? true;
+                    if (!visible) stop();
+                    else if (reducedMotion.matches) renderStill();
+                    else start();
+                },
+                { rootMargin: "8% 0px" },
+            );
+            observer.observe(stage);
+
+            const resizeObserver = new ResizeObserver(([entry]) => {
+                const bounds = entry?.contentRect;
+                if (bounds) resizeTo(bounds.width, bounds.height);
+                else measure();
+                if (visible && !document.hidden) {
+                    draw();
+                    lastDraw = performance.now();
+                }
+            });
+            resizeObserver.observe(stage);
+
+            const handleVisibility = () => {
+                if (document.hidden) stop();
+                else if (reducedMotion.matches) renderStill();
+                else start();
+            };
+
+            const handleMotionChange = () => {
+                stop();
+                renderStill();
+                if (!reducedMotion.matches) start();
+            };
+
+            const handleMobileChange = () => {
+                renderScale = qualityBounds().initial;
+                performanceTime = 0;
+                performanceSamples = 0;
+                measure();
+                if (visible && !document.hidden) renderStill();
+            };
+
+            const handleContextLoss = (event: Event) => {
+                event.preventDefault();
+                useFallback("WebGL context lost; retaining the CSS pool fallback.");
+            };
+
+            document.addEventListener("visibilitychange", handleVisibility);
+            reducedMotion.addEventListener("change", handleMotionChange);
+            mobile.addEventListener("change", handleMobileChange);
+            canvas.addEventListener("webglcontextlost", handleContextLoss);
+            cleanupCallbacks.push(() => {
+                stop();
+                observer.disconnect();
+                resizeObserver.disconnect();
+                document.removeEventListener("visibilitychange", handleVisibility);
+                reducedMotion.removeEventListener("change", handleMotionChange);
+                mobile.removeEventListener("change", handleMobileChange);
+                canvas.removeEventListener("webglcontextlost", handleContextLoss);
+                gl.deleteBuffer(buffer);
+                gl.deleteProgram(program);
+            });
+
+            measure();
+            renderStill();
+            lastDraw = performance.now();
+            if (!reducedMotion.matches) start();
+            window.dispatchEvent(new Event("illyune:request-time-state"));
+        } catch (error) {
+            useFallback(error);
+            window.dispatchEvent(new Event("illyune:request-time-state"));
+        }
+    };
+
+    document.querySelectorAll<HTMLElement>("[data-pool-wallpaper]").forEach(mountPoolWallpaper);
+</script>
+
+<style>
+    .pool-wallpaper {
+        --pool-base: rgb(8 119 160);
+        --pool-grout: rgb(147 211 215);
+        --pool-caustic-opacity: 0.14;
+        --pool-glint-opacity: 0.24;
+        --pool-light-x: 50%;
+        --pool-light-y: 34%;
+        --pool-caustic-angle: -7deg;
+        --pool-fallback-shift: 2rem;
+        --pool-tile-size: clamp(2.15rem, 4.5vmin, 3.25rem);
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: var(--pool-base);
+        isolation: isolate;
+        pointer-events: none;
+    }
+
+    .pool-canvas,
+    .pool-fallback {
+        position: absolute;
+        inset: -1.25%;
+        width: 102.5%;
+        height: 102.5%;
+        transform: translate3d(var(--pool-parallax-x, 0px), var(--pool-parallax-y, 0px), 0);
+        transition: transform 180ms ease-out;
+    }
+
+    .pool-canvas {
+        z-index: 1;
+        display: block;
+        opacity: 0;
+        transition: opacity 180ms linear;
+    }
+
+    .pool-fallback {
+        z-index: 0;
+        overflow: hidden;
+        background-color: var(--pool-base);
+        background-image:
+            linear-gradient(116deg, transparent 31%, rgb(202 244 247 / 11%) 47%, transparent 61%),
+            linear-gradient(90deg, transparent calc(100% - 1px), var(--pool-grout) 0),
+            linear-gradient(transparent calc(100% - 1px), var(--pool-grout) 0);
+        background-position:
+            var(--pool-fallback-shift) 0,
+            0 0,
+            0 0;
+        background-size:
+            160% 100%,
+            var(--pool-tile-size) var(--pool-tile-size),
+            var(--pool-tile-size) var(--pool-tile-size);
+        opacity: 1;
+        transition: opacity 220ms linear;
+    }
+
+    .pool-fallback::before {
+        position: absolute;
+        z-index: 1;
+        top: var(--pool-light-y);
+        left: var(--pool-light-x);
+        width: clamp(5.5rem, 15vw, 11rem);
+        height: clamp(2.75rem, 7vw, 5rem);
+        background: repeating-linear-gradient(
+            113deg,
+            transparent 0 0.45rem,
+            rgb(232 255 252 / 70%) 0.52rem 0.62rem,
+            transparent 0.7rem 1.24rem
+        );
+        clip-path: polygon(9% 30%, 86% 0, 100% 65%, 22% 100%);
+        content: "";
+        opacity: var(--pool-glint-opacity);
+        transform: translate(-50%, -50%) skewX(-8deg);
+    }
+
+    .pool-fallback-caustics {
+        position: absolute;
+        inset: -22%;
+        display: block;
+        background:
+            repeating-linear-gradient(
+                38deg,
+                transparent 0 1.42rem,
+                rgb(222 252 252 / 26%) 1.51rem 1.6rem,
+                transparent 1.7rem 3.25rem
+            ),
+            repeating-linear-gradient(
+                -43deg,
+                transparent 0 1.78rem,
+                rgb(215 249 252 / 22%) 1.86rem 1.94rem,
+                transparent 2.04rem 3.72rem
+            );
+        background-size:
+            13rem 11rem,
+            17rem 14rem;
+        content: "";
+        mix-blend-mode: screen;
+        opacity: var(--pool-caustic-opacity);
+        transform: rotate(var(--pool-caustic-angle)) skew(-0.65deg, 0.35deg) scale(1.025);
+        animation: pool-caustics-drift 24s ease-in-out infinite alternate;
+    }
+
+    .pool-wallpaper.is-ready .pool-canvas {
+        opacity: 1;
+    }
+
+    .pool-wallpaper.is-ready .pool-fallback {
+        opacity: 0;
+    }
+
+    .pool-wallpaper.is-ready .pool-fallback-caustics {
+        animation-play-state: paused;
+    }
+
+    .pool-wallpaper.is-fallback .pool-canvas {
+        opacity: 0;
+    }
+
+    .pool-wallpaper.is-fallback .pool-fallback {
+        opacity: 1;
+    }
+
+    .pool-wallpaper.is-fallback .pool-fallback-caustics {
+        animation-play-state: running;
+    }
+
+    @keyframes pool-caustics-drift {
+        from {
+            background-position:
+                0 0,
+                2rem -1rem;
+            translate: -0.35% -0.25%;
+            scale: 1.025;
+        }
+        to {
+            background-position:
+                0.7rem 0.4rem,
+                1.25rem -0.35rem;
+            translate: 0.35% 0.25%;
+            scale: 1.035;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .pool-canvas,
+        .pool-fallback {
+            transition: none;
+        }
+
+        .pool-fallback-caustics {
+            animation: none;
+        }
+    }
+
+    @media (prefers-contrast: more) {
+        .pool-fallback {
+            background-image:
+                linear-gradient(
+                    116deg,
+                    transparent 31%,
+                    rgb(202 244 247 / 11%) 47%,
+                    transparent 61%
+                ),
+                linear-gradient(90deg, transparent calc(100% - 2px), var(--pool-grout) 0),
+                linear-gradient(transparent calc(100% - 2px), var(--pool-grout) 0);
+        }
+    }
+</style>
