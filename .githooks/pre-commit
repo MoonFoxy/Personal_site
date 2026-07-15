@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -eu
+
+node scripts/check-version-bump.mjs

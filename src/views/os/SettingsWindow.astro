@@ -1,6 +1,9 @@
 ---
 import WindowFrame from "./WindowFrame.astro";
 import OsIcon from "./OsIcon.astro";
+import packageJson from "../../../package.json";
+
+const siteVersion = packageJson.version;
 ---
 
 <WindowFrame
@@ -70,7 +73,9 @@ import OsIcon from "./OsIcon.astro";
             </div>
         </div>
         <footer class="settings-version">
-            <strong data-i18n="settings.version">Illyune OS™ Version 1.0</strong>
+            <strong data-i18n="settings.version" data-i18n-version={siteVersion}
+                >Illyune OS™, версия {siteVersion}</strong
+            >
             <span data-i18n="settings.copyright">Copyright 2026 Illyune</span>
         </footer>
     </section>

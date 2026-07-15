@@ -1,7 +1,7 @@
 {
     "name": "illyune-site",
     "type": "module",
-    "version": "0.0.1",
+    "version": "0.0.9",
     "private": true,
     "license": "UNLICENSED",
     "packageManager": "yarn@1.22.22",
@@ -16,6 +16,7 @@
         "build": "yarn typecheck && node ./node_modules/astro/bin/astro.mjs build",
         "test": "yarn build && node --no-warnings --experimental-strip-types scripts/time-state.test.mjs && node scripts/validate-build.mjs",
         "validate": "yarn format:check && yarn test",
+        "version:check": "node scripts/check-version-bump.mjs",
         "preview": "node ./node_modules/astro/bin/astro.mjs preview",
         "astro": "node ./node_modules/astro/bin/astro.mjs"
     },

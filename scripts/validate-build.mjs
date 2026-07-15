@@ -6,13 +6,19 @@ import { join } from "node:path";
 const root = process.cwd();
 const dist = join(root, "dist");
 const html = await readFile(join(dist, "index.html"), "utf8");
+const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+assert.match(
+    packageJson.version,
+    /^\d+\.\d+\.\d+$/u,
+    "package.json version must use MAJOR.MINOR.PATCH",
+);
 
 const requiredFragments = [
     '<html lang="ru"',
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">',
     '<meta name="description" content="Личная страница Illyune',
     '<meta property="og:title" content="Illyune OS">',
-    "<title>Ｉ ｌ ｌ ｙ ｕ ｎ ｅ  Ｏ Ｓ ™</title>",
+    "<title>Ｉ ｌ ｌ ｙ ｕ ｎ ｅ Ｏ Ｓ ™</title>",
     'rel="canonical" href="https://illyu.net/"',
     'id="hero-title"',
     ">Illyune</span>",
@@ -28,7 +34,7 @@ const requiredFragments = [
     "data-local-clock",
     'class="launcher"',
     "data-email-form",
-    "Illyune OS™ Version 1.0",
+    `data-i18n-version="${packageJson.version}"`,
 ];
 
 for (const fragment of requiredFragments) {

@@ -58,7 +58,7 @@ const ruMessages = {
     "settings.language": "Язык",
     "settings.date": "Дата",
     "settings.time": "Время",
-    "settings.version": "Illyune OS™, версия 1.0",
+    "settings.version": "Illyune OS™, версия {version}",
     "settings.copyright": "Copyright 2026 Illyune",
     "settings.pointer": "Курсор",
     "settings.tabs": "Разделы настроек",
@@ -134,7 +134,7 @@ const enMessages = {
     "settings.language": "Language",
     "settings.date": "Date",
     "settings.time": "Time",
-    "settings.version": "Illyune OS™ Version 1.0",
+    "settings.version": "Illyune OS™ Version {version}",
     "settings.copyright": "Copyright 2026 Illyune",
     "settings.pointer": "Pointer",
     "settings.tabs": "Settings sections",
@@ -225,7 +225,8 @@ export const translateDocument = (locale: Locale, root: ParentNode = document) =
     root.querySelectorAll<HTMLElement>("[data-i18n]").forEach((element) => {
         const key = element.dataset.i18n;
         if (!key) return;
-        const value = translate(locale, key);
+        const version = element.dataset.i18nVersion;
+        const value = translate(locale, key, version ? { version } : undefined);
         if (value !== key) element.textContent = value;
     });
 
