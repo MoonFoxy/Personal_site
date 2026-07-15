@@ -5,12 +5,12 @@ export const LOCALE_STORAGE_KEY = "illyune.locale.v1";
 
 const PAGE_COPY = {
     ru: {
-        title: "Illyune OS",
+        title: "Ｉ ｌ ｌ ｙ ｕ ｎ ｅ  Ｏ Ｓ ™",
         description:
             "Личная страница Illyune в виде ретро-операционной системы с контактами и живым бассейном.",
     },
     en: {
-        title: "Illyune OS",
+        title: "Ｉ ｌ ｌ ｙ ｕ ｎ ｅ  Ｏ Ｓ ™",
         description:
             "Illyune's personal page: a retro operating system with contacts and a living pool.",
     },
@@ -47,7 +47,7 @@ const ruMessages = {
     "window.settings.close": "Закрыть настройки",
     "system.aria": "Системная панель",
     "windows.aria": "Открытые приложения",
-    "boot.aria": "Загрузка Illyune OS",
+    "boot.aria": "Загрузка Illyune OS™",
     "boot.progress": "Прогресс загрузки",
     "action.open_original": "Открыть оригинал",
     "profile.telegram.bio": "Личные сообщения и быстрый способ связаться со мной.",
@@ -58,7 +58,7 @@ const ruMessages = {
     "settings.language": "Язык",
     "settings.date": "Дата",
     "settings.time": "Время",
-    "settings.version": "Illyune OS, версия 1.0",
+    "settings.version": "Illyune OS™, версия 1.0",
     "settings.copyright": "Copyright 2026 Illyune",
     "settings.pointer": "Курсор",
     "settings.tabs": "Разделы настроек",
@@ -87,7 +87,7 @@ const ruMessages = {
     "github.followers": "подписчиков",
     "github.following": "подписок",
     "github.updated": "Обновлено",
-    "boot.complete": "Illyune OS загружена",
+    "boot.complete": "Illyune OS™ загружена",
 } as const;
 
 export type TranslationKey = keyof typeof ruMessages;
@@ -123,7 +123,7 @@ const enMessages = {
     "window.settings.close": "Close Settings",
     "system.aria": "System bar",
     "windows.aria": "Open applications",
-    "boot.aria": "Loading Illyune OS",
+    "boot.aria": "Loading Illyune OS™",
     "boot.progress": "Loading progress",
     "action.open_original": "Open original",
     "profile.telegram.bio": "Direct messages and the quickest way to reach me.",
@@ -134,7 +134,7 @@ const enMessages = {
     "settings.language": "Language",
     "settings.date": "Date",
     "settings.time": "Time",
-    "settings.version": "Illyune OS Version 1.0",
+    "settings.version": "Illyune OS™ Version 1.0",
     "settings.copyright": "Copyright 2026 Illyune",
     "settings.pointer": "Pointer",
     "settings.tabs": "Settings sections",
@@ -163,7 +163,7 @@ const enMessages = {
     "github.followers": "followers",
     "github.following": "following",
     "github.updated": "Updated",
-    "boot.complete": "Illyune OS loaded",
+    "boot.complete": "Illyune OS™ loaded",
 } as const satisfies Record<TranslationKey, string>;
 
 const messages = { ru: ruMessages, en: enMessages } as const;

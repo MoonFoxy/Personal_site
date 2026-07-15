@@ -12,7 +12,7 @@ const requiredFragments = [
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">',
     '<meta name="description" content="Личная страница Illyune',
     '<meta property="og:title" content="Illyune OS">',
-    "<title>Illyune OS</title>",
+    "<title>Ｉ ｌ ｌ ｙ ｕ ｎ ｅ  Ｏ Ｓ ™</title>",
     'rel="canonical" href="https://illyu.net/"',
     'id="hero-title"',
     ">Illyune</span>",
@@ -28,7 +28,7 @@ const requiredFragments = [
     "data-local-clock",
     'class="launcher"',
     "data-email-form",
-    "Illyune OS Version 1.0",
+    "Illyune OS™ Version 1.0",
 ];
 
 for (const fragment of requiredFragments) {

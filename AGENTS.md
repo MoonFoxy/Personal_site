@@ -1,4 +1,4 @@
-# Illyune OS — instructions for contributors
+# Ｉ ｌ ｌ ｙ ｕ ｎ ｅ  Ｏ Ｓ ™ — instructions for contributors
 
 ## Project
 
