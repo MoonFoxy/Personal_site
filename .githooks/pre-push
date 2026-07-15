@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "Running yarn validate before push..."
+yarn validate

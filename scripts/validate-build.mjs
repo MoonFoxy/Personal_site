@@ -101,17 +101,35 @@ assert.ok(
 );
 assert.ok(html.includes("data-github-state"), "GitHub window is missing an honest loading state");
 
-const avatarTag = html.match(/<img\b[^>]*alt="[^"]+[^>]*>/u)?.[0];
-assert.ok(avatarTag, "Missing avatar image or localized alt text");
-const srcset = avatarTag.match(/srcset="([^"]+)"/u)?.[1];
-assert.ok(srcset, "Avatar is missing a responsive srcset");
-const avatarUrls = srcset.split(",").map((candidate) => candidate.trim().split(/\s+/u)[0]);
-await Promise.all(
-    avatarUrls.map((url) => {
-        assert.ok(url.startsWith("/_astro/"), `Unexpected avatar URL: ${url}`);
-        return access(join(dist, url.slice(1)));
-    }),
-);
+const avatarTags = [...html.matchAll(/<img\b[^>]*>/gu)]
+    .map(([tag]) => tag)
+    .filter((tag) => /\bdata-avatar-image(?:\s|=|>)/u.test(tag));
+assert.equal(avatarTags.length, 5, "The desktop must contain five profile avatars");
+
+const configuredAvatarOrigins = new Set();
+for (const avatarTag of avatarTags) {
+    const source = avatarTag.match(/\bsrc="([^"]+)"/u)?.[1];
+    const width = avatarTag.match(/\bwidth="(\d+)"/u)?.[1];
+    const height = avatarTag.match(/\bheight="(\d+)"/u)?.[1];
+    assert.ok(source, "Avatar is missing an image source");
+    assert.ok(width && height, `Avatar ${source} must reserve its layout size`);
+
+    const srcset = avatarTag.match(/\bsrcset="([^"]+)"/u)?.[1];
+    if (source.startsWith("/_astro/")) {
+        assert.ok(srcset, "A locally processed avatar is missing a responsive srcset");
+        const avatarUrls = srcset.split(",").map((candidate) => candidate.trim().split(/\s+/u)[0]);
+        await Promise.all(
+            avatarUrls.map((url) => {
+                assert.ok(url.startsWith("/_astro/"), `Unexpected local avatar URL: ${url}`);
+                return access(join(dist, url.slice(1)));
+            }),
+        );
+        continue;
+    }
+
+    assert.match(source, /^https:\/\//u, `External avatar must use HTTPS: ${source}`);
+    configuredAvatarOrigins.add(new URL(source).origin);
+}
 
 const builtAssetUrls = [
     ...new Set(
@@ -241,7 +259,12 @@ const requireCspSources = (name, sources) => {
 requireCspSources("default-src", ["'self'"]);
 requireCspSources("connect-src", ["'self'", "https://api.github.com"]);
 requireCspSources("frame-src", ["'none'"]);
-requireCspSources("img-src", ["'self'", "data:", "https://avatars.githubusercontent.com"]);
+requireCspSources("img-src", [
+    "'self'",
+    "data:",
+    "https://avatars.githubusercontent.com",
+    ...configuredAvatarOrigins,
+]);
 assert.ok(robots.includes("Sitemap: https://illyu.net/sitemap.xml"), "robots.txt sitemap is wrong");
 assert.ok(fontLicense.includes("Pixel Script"), "Pixel Script licence is missing");
 assert.deepEqual(
