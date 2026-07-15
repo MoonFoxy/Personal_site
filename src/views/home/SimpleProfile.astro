@@ -7,65 +7,63 @@ import AvatarPlaceholder from "../os/AvatarPlaceholder.astro";
 const avatarUrl = profileAvatarConfig.home;
 ---
 
-<figure class="profile">
-    <div class="profile__frame">
-        <div class="profile__avatar" data-avatar-frame data-avatar-state="loading">
-            <AvatarPlaceholder />
-            {
-                avatarUrl ? (
-                    <img
-                        class="profile__avatar-image"
-                        src={avatarUrl}
-                        alt="Avatar"
-                        width="384"
-                        height="384"
-                        loading="eager"
-                        decoding="async"
-                        fetchpriority="high"
-                        referrerpolicy="no-referrer"
-                        data-avatar-image
-                    />
-                ) : (
-                    <Image
-                        class="profile__avatar-image"
-                        src={avatar}
-                        alt="Avatar"
-                        widths={[192, 288, 384]}
-                        width={384}
-                        height={384}
-                        sizes="(max-width: 640px) 88px, 132px"
-                        format="webp"
-                        quality={90}
-                        loading="eager"
-                        decoding="async"
-                        fetchpriority="high"
-                        data-avatar-image
-                    />
-                )
-            }
+<div class="profile-stage">
+    <span class="profile-shadow" aria-hidden="true"></span>
+    <figure class="profile">
+        <div class="profile__frame">
+            <div class="profile__avatar" data-avatar-frame data-avatar-state="loading">
+                <AvatarPlaceholder />
+                {
+                    avatarUrl ? (
+                        <img
+                            class="profile__avatar-image"
+                            src={avatarUrl}
+                            alt="Avatar"
+                            width="384"
+                            height="384"
+                            loading="eager"
+                            decoding="async"
+                            fetchpriority="high"
+                            referrerpolicy="no-referrer"
+                            data-avatar-image
+                        />
+                    ) : (
+                        <Image
+                            class="profile__avatar-image"
+                            src={avatar}
+                            alt="Avatar"
+                            widths={[192, 288, 384]}
+                            width={384}
+                            height={384}
+                            sizes="(max-width: 640px) 88px, 132px"
+                            format="webp"
+                            quality={90}
+                            loading="eager"
+                            decoding="async"
+                            fetchpriority="high"
+                            referrerpolicy="no-referrer"
+                            data-avatar-image
+                        />
+                    )
+                }
+            </div>
         </div>
-    </div>
-</figure>
+    </figure>
+</div>
 
 <style>
-    .profile {
+    .profile-stage {
         position: relative;
         z-index: 1;
-        isolation: isolate;
         margin: clamp(-0.5rem, -0.6vw, -0.2rem) 0 0;
-        padding: 5px;
-        border: 1px solid var(--ui-ink, #101515);
-        border-radius: 3px;
-        background: var(--ui-panel, #f4f0e4);
-        color: var(--ui-ink, #101515);
         pointer-events: none;
     }
 
-    .profile::before {
+    .profile-shadow {
         position: absolute;
-        z-index: -1;
-        inset: 0;
-        border-radius: inherit;
+        z-index: 0;
+        inset: 5px -5px -5px 5px;
+        border-radius: 3px;
         background-color: color-mix(in srgb, var(--pool-deep) 74%, transparent);
         background-image: radial-gradient(
             circle,
@@ -73,8 +71,19 @@ const avatarUrl = profileAvatarConfig.home;
             transparent 0.8px
         );
         background-size: 2px 2px;
-        content: "";
-        transform: translate(5px, 5px);
+    }
+
+    .profile {
+        position: relative;
+        z-index: 1;
+        isolation: isolate;
+        margin: 0;
+        padding: 5px;
+        border: 1px solid var(--ui-ink, #101515);
+        border-radius: 3px;
+        background: var(--ui-panel, #f4f0e4);
+        color: var(--ui-ink, #101515);
+        pointer-events: none;
     }
 
     .profile__frame {
@@ -102,7 +111,6 @@ const avatarUrl = profileAvatarConfig.home;
 
     @media (max-width: 640px) {
         .profile {
-            margin-top: -0.25rem;
             padding: 4px;
         }
 
@@ -113,7 +121,6 @@ const avatarUrl = profileAvatarConfig.home;
 
     @media (max-height: 440px) {
         .profile {
-            margin-top: -0.2rem;
             padding: 3px;
         }
 
@@ -128,7 +135,7 @@ const avatarUrl = profileAvatarConfig.home;
             background: Canvas;
         }
 
-        .profile::before {
+        .profile-shadow {
             display: none;
         }
     }
