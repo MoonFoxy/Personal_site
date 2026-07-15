@@ -155,7 +155,7 @@ import OsIcon from "./OsIcon.astro";
         position: absolute;
         z-index: -1;
         inset: 4px -6px -6px 4px;
-        border-radius: 0 0 6px 0;
+        border-radius: 6px;
         background-image: radial-gradient(
             circle at 0 0,
             rgba(8, 22, 23, 0.78) 0 0.65px,
@@ -194,6 +194,7 @@ import OsIcon from "./OsIcon.astro";
     .system-bar {
         position: absolute;
         z-index: 60;
+        border-radius: 0 0 0 4px;
         top: env(safe-area-inset-top);
         right: env(safe-area-inset-right);
         left: auto;
@@ -234,6 +235,10 @@ import OsIcon from "./OsIcon.astro";
     .system-cell--date,
     .system-cell--clock {
         font-variant-numeric: tabular-nums;
+    }
+
+    .system-cell--date {
+        border-bottom-left-radius: 4px;
     }
 
     .system-cell,
@@ -283,7 +288,7 @@ import OsIcon from "./OsIcon.astro";
         position: absolute;
         z-index: 0;
         inset: 4px -6px -6px 4px;
-        border-radius: 0 0 6px 0;
+        border-radius: 6px;
         background-image: radial-gradient(
             circle at 0 0,
             rgba(8, 22, 23, 0.78) 0 0.65px,
@@ -452,10 +457,20 @@ import OsIcon from "./OsIcon.astro";
     }
 
     .profile-avatar {
+        position: relative;
         display: block;
+        overflow: hidden;
         object-fit: cover;
         object-position: 52% 48%;
         image-rendering: auto;
+    }
+
+    .profile-avatar__image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 52% 48%;
     }
 
     .profile-avatar--large {
