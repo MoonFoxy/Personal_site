@@ -1,7 +1,7 @@
 {
     "name": "illyune-site",
     "type": "module",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "private": true,
     "license": "UNLICENSED",
     "packageManager": "yarn@1.22.22",

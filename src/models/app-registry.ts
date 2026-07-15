@@ -26,7 +26,7 @@ export type ProfileAvatarId = (typeof PROFILE_AVATAR_IDS)[number];
  * `public/_headers` before deployment so the site's CSP permits it to load.
  */
 export const profileAvatarConfig: Readonly<Record<ProfileAvatarId, string | null>> = {
-    home: "https://seccdn.libravatar.org/gravatarproxy/e229e4c559e4cbacdf7dcd4c612195df371ebabadc5cdac26fcf19f8bf206bf2?s=1024",
+    home: "https://cdn.libravatar.org/avatar/e87b4751a4a94ceffeb9ff31cc008b73?d=404&s=1024",
     telegram: "https://t.me/i/userpic/320/MoonFoxy.jpg",
     github: "https://github.com/MoonFoxy.png?size=512",
     discord:
