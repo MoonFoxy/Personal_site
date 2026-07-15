@@ -1,4 +1,4 @@
-# Illyune Pool OS — instructions for contributors
+# Illyune OS — instructions for contributors
 
 ## Project
 

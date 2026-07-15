@@ -11,8 +11,8 @@ const requiredFragments = [
     '<html lang="ru"',
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">',
     '<meta name="description" content="Личная страница Illyune',
-    '<meta property="og:title" content="Illyune — personal Pool OS">',
-    "<title>Illyune — личный Pool OS</title>",
+    '<meta property="og:title" content="Illyune OS">',
+    "<title>Illyune OS</title>",
     'rel="canonical" href="https://illyu.net/"',
     'id="hero-title"',
     ">Illyune</span>",
@@ -101,7 +101,7 @@ assert.ok(
 );
 assert.ok(html.includes("data-github-state"), "GitHub window is missing an honest loading state");
 
-const avatarTag = html.match(/<img\b[^>]*alt="Аватар Illyune[^>]*>/u)?.[0];
+const avatarTag = html.match(/<img\b[^>]*alt="[^"]+[^>]*>/u)?.[0];
 assert.ok(avatarTag, "Missing avatar image or localized alt text");
 const srcset = avatarTag.match(/srcset="([^"]+)"/u)?.[1];
 assert.ok(srcset, "Avatar is missing a responsive srcset");

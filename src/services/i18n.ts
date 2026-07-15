@@ -5,12 +5,12 @@ export const LOCALE_STORAGE_KEY = "illyune.locale.v1";
 
 const PAGE_COPY = {
     ru: {
-        title: "Illyune — личный Pool OS",
+        title: "Illyune OS",
         description:
             "Личная страница Illyune в виде ретро-операционной системы с контактами и живым бассейном.",
     },
     en: {
-        title: "Illyune — personal Pool OS",
+        title: "Illyune OS",
         description:
             "Illyune's personal page: a retro operating system with contacts and a living pool.",
     },
