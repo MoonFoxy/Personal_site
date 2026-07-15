@@ -1,9 +1,13 @@
 ---
 import avatar from "../../assets/avatar.png";
-import { appById, GITHUB_USERNAME } from "../../models/app-registry";
+import { appById, GITHUB_USERNAME, profileAvatarConfig } from "../../models/app-registry";
+import AvatarPlaceholder from "./AvatarPlaceholder.astro";
 import WindowFrame from "./WindowFrame.astro";
 
 const href = appById("github")?.href ?? "#";
+const configuredAvatarUrl = profileAvatarConfig.github;
+const avatarUrl = configuredAvatarUrl ?? avatar.src;
+const hasConfiguredAvatar = configuredAvatarUrl !== null;
 ---
 
 <WindowFrame
@@ -13,16 +17,28 @@ const href = appById("github")?.href ?? "#";
     title="GitHub Explorer"
 >
     <section class="github-profile" aria-labelledby="github-profile-name">
-        <img
+        <div
             class="profile-avatar profile-avatar--github"
-            src={avatar.src}
-            alt="Avatar"
-            width="112"
-            height="112"
-            loading="lazy"
-            decoding="async"
-            data-github-avatar
-        />
+            data-avatar-frame
+            data-avatar-state="loading"
+        >
+            <AvatarPlaceholder />
+            <img
+                class="profile-avatar__image"
+                src={avatarUrl}
+                alt="Avatar"
+                width="112"
+                height="112"
+                loading={hasConfiguredAvatar ? "lazy" : "eager"}
+                decoding="async"
+                referrerpolicy="no-referrer"
+                data-avatar-image
+                data-github-avatar
+                data-avatar-configured={hasConfiguredAvatar || undefined}
+                data-avatar-fallback={avatar.src}
+                data-github-avatar-mode={hasConfiguredAvatar ? "configured" : "automatic"}
+            />
+        </div>
         <div class="github-profile__copy">
             <h3 id="github-profile-name" data-github-name>{GITHUB_USERNAME}</h3>
             <p data-github-login>@{GITHUB_USERNAME}</p>

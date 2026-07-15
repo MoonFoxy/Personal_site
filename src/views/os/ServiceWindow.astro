@@ -1,7 +1,8 @@
 ---
 import { Image } from "astro:assets";
 import avatar from "../../assets/avatar.png";
-import { appById, type AppId } from "../../models/app-registry";
+import { appById, profileAvatarConfig, type AppId } from "../../models/app-registry";
+import AvatarPlaceholder from "./AvatarPlaceholder.astro";
 import WindowFrame from "./WindowFrame.astro";
 
 type ServiceAppId = Extract<AppId, "telegram" | "discord" | "x">;
@@ -16,6 +17,7 @@ interface Props {
 
 const { appId, displayName, handle, title, bootAvatar = false } = Astro.props;
 const href = appById(appId)?.href ?? "#";
+const avatarUrl = profileAvatarConfig[appId];
 ---
 
 <WindowFrame
@@ -25,18 +27,43 @@ const href = appById(appId)?.href ?? "#";
     title={title}
 >
     <section class={`service-profile service-profile--${appId}`} aria-labelledby={`${appId}-name`}>
-        <Image
+        <div
             class="profile-avatar profile-avatar--large"
-            data-boot-avatar={bootAvatar || undefined}
-            src={avatar}
-            alt="Avatar"
-            width={192}
-            height={192}
-            format="webp"
-            quality={84}
-            loading="eager"
-            decoding="async"
-        />
+            data-avatar-frame
+            data-avatar-state="loading"
+        >
+            <AvatarPlaceholder />
+            {
+                avatarUrl ? (
+                    <img
+                        class="profile-avatar__image"
+                        src={avatarUrl}
+                        alt={`${displayName} avatar`}
+                        width="192"
+                        height="192"
+                        loading="eager"
+                        decoding="async"
+                        referrerpolicy="no-referrer"
+                        data-avatar-image
+                        data-boot-avatar={bootAvatar || undefined}
+                    />
+                ) : (
+                    <Image
+                        class="profile-avatar__image"
+                        src={avatar}
+                        alt={`${displayName} avatar`}
+                        width={192}
+                        height={192}
+                        format="webp"
+                        quality={84}
+                        loading="eager"
+                        decoding="async"
+                        data-avatar-image
+                        data-boot-avatar={bootAvatar || undefined}
+                    />
+                )
+            }
+        </div>
         <div class="service-profile__copy">
             <h3 id={`${appId}-name`}>{displayName}</h3>
             <p class="service-handle">{handle}</p>

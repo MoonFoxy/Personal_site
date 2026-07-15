@@ -1,5 +1,6 @@
 import type { Locale, LocaleChangeDetail } from "../models/os-types";
 import { applyLocale, detectLocale, isSupportedLocale } from "../services/i18n";
+import { mountAvatarPlaceholders } from "./os/avatar-controller";
 import { mountBootSequence } from "./os/boot-controller";
 import { mountClock } from "./os/clock-controller";
 import { mountEmail } from "./os/email-controller";
@@ -33,6 +34,7 @@ export const mountPoolOs = () => {
     const github = mountGitHub(shell, getLocale);
     const cleanups = [
         () => window.removeEventListener("illyune:locale-change", onLocaleChange),
+        mountAvatarPlaceholders(),
         mountClock(shell, getLocale),
         mountParallax(),
         mountSettings(shell, { getLocale, setLocale }),

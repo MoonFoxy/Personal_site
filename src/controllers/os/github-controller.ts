@@ -89,7 +89,15 @@ const render = (
         `${user.followers} ${translate(locale, "github.followers")} · ${user.following} ${translate(locale, "github.following")}`,
     );
     root.querySelectorAll<HTMLImageElement>("img[data-github-avatar]").forEach((avatar) => {
-        avatar.src = user.avatarUrl;
+        if (avatar.dataset.avatarConfigured === "true") return;
+        // `null` in profileAvatarConfig.github means that this image is owned by
+        // the public GitHub profile.  Write the attribute explicitly so the
+        // avatar state observer sees every source swap and a manually supplied
+        // URL remains protected by the configured guard above.
+        avatar.loading = "eager";
+        avatar.removeAttribute("srcset");
+        avatar.setAttribute("src", user.avatarUrl);
+        avatar.dataset.githubAvatarUrl = user.avatarUrl;
         avatar.alt = user.name || user.login;
     });
     renderRepositories(root, repositories, getLocale);

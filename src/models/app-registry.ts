@@ -12,6 +12,27 @@ export interface AppDefinition {
 export const CONTACT_EMAIL = "contact@illyu.net";
 export const GITHUB_USERNAME = "MoonFoxy";
 
+export const PROFILE_AVATAR_IDS = ["home", "telegram", "github", "discord", "x"] as const;
+
+export type ProfileAvatarId = (typeof PROFILE_AVATAR_IDS)[number];
+
+/**
+ * Paste a direct HTTPS image URL for the corresponding profile avatar.
+ * For GitHub, leave the value as `null` to load the public avatar from the
+ * GitHub API when its window opens. For the other profiles, `null` uses the
+ * bundled avatar.
+ *
+ * If a URL uses a new external host, add that host to `img-src` in
+ * `public/_headers` before deployment so the site's CSP permits it to load.
+ */
+export const profileAvatarConfig: Readonly<Record<ProfileAvatarId, string | null>> = {
+    home: "https://seccdn.libravatar.org/gravatarproxy/e229e4c559e4cbacdf7dcd4c612195df371ebabadc5cdac26fcf19f8bf206bf2?s=1024",
+    telegram: "https://t.me/i/userpic/320/MoonFoxy.jpg",
+    github: "https://github.com/MoonFoxy.png?size=512",
+    discord: "https://cdn.discordapp.com/avatars/289418396867624960/31816b9c2ebaca88a1a772be77d45aaa.png?size=512",
+    x: "https://pbs.twimg.com/profile_images/1431348806524755976/axnNU4Ap.jpg",
+};
+
 export const apps: readonly AppDefinition[] = [
     {
         id: "telegram",

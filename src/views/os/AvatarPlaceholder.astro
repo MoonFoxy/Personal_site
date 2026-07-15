@@ -1,0 +1,59 @@
+<span class="avatar-placeholder" data-avatar-placeholder aria-hidden="true">
+    <span class="avatar-placeholder__tile">
+        <img
+            src="/os-icons/fugue/user-silhouette-question.png"
+            width="16"
+            height="16"
+            alt=""
+            decoding="sync"
+            draggable="false"
+        />
+    </span>
+</span>
+
+<style>
+    .avatar-placeholder {
+        position: absolute;
+        z-index: 1;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #edf5f6;
+        opacity: 1;
+        transition:
+            opacity 100ms linear,
+            visibility 100ms linear;
+        pointer-events: none;
+    }
+
+    .avatar-placeholder[hidden] {
+        display: none;
+    }
+
+    .avatar-placeholder__tile {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border: 1px solid #889895;
+        border-radius: 3px;
+        background: #fffef7;
+        box-shadow:
+            inset 1px 1px 0 #fff,
+            inset -1px -1px 0 #d5e6e9;
+    }
+
+    .avatar-placeholder img {
+        display: block;
+        width: 16px;
+        height: 16px;
+        image-rendering: crisp-edges;
+        image-rendering: pixelated;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .avatar-placeholder {
+            transition: none;
+        }
+    }
+</style>

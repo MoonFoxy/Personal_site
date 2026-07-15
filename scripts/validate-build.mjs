@@ -298,6 +298,7 @@ const osIconFiles = [
     "gear.png",
     "calendar.png",
     "clock.png",
+    "user-silhouette-question.png",
 ];
 await Promise.all(
     osIconFiles.map(async (file) => {

@@ -24,6 +24,7 @@ The unmodified files used by this site are:
 | Settings  | `icons/gear.png`                    | `/os-icons/fugue/gear.png`            |
 | Date      | `icons/calendar.png`                | `/os-icons/fugue/calendar.png`        |
 | Time      | `icons/clock.png`                   | `/os-icons/fugue/clock.png`           |
+| Avatar placeholder | `icons/user-silhouette-question.png` | `/os-icons/fugue/user-silhouette-question.png` |
 
 The archive's original attribution and notices are preserved in
 [`FUGUE-ICONS-README.txt`](./FUGUE-ICONS-README.txt). The complete license text
